@@ -1,12 +1,12 @@
-![](https://github.com/SergeyMi37/apptools-task/blob/master/doc/favicon.ico)
-## apptools-task
-[![Gitter](https://img.shields.io/badge/Available%20on-Intersystems%20Open%20Exchange-00b2a9.svg)](https://openexchange.intersystems.com/package/apptools-task-1)
+![](https://github.com/SergeyMi37/apptools-util/blob/master/doc/favicon.ico)
+## apptools-util
+[![Gitter](https://img.shields.io/badge/Available%20on-Intersystems%20Open%20Exchange-00b2a9.svg)](https://openexchange.intersystems.com/package/apptools-util-1)
 
-An example of a backup task with preliminary deletion of old files.
+Utilities for generating a XLS file, adapting for IRIS and working with modules ZPM.
 
 ## Installation with ZPM
 
-zpm:USER>install apptools-task
+zpm:USER>install apptools-util
 
 ## Installation with Docker
 
@@ -17,7 +17,7 @@ Make sure you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installi
 Clone/git pull the repo into any local directory
 
 ```
-$ git clone https://github.com/SergeyMi37/apptools-task.git
+$ git clone https://github.com/SergeyMi37/apptools-util.git
 ```
 
 Open the terminal in this directory and run:
@@ -39,7 +39,7 @@ Open IRIS terminal:
 $ docker-compose exec iris iris session iris
 USER>
 USER>zpm
-zpm:USER>install apptools-task
+zpm:USER>install apptools-util
 ```
 
 
