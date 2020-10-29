@@ -9,7 +9,7 @@
 	<Dependencies>
       <ModuleReference>
         <Name>apptools-admin</Name>
-        <Version>1.0.0</Version>
+        <Version>1.*.*</Version>
       </ModuleReference>
     </Dependencies>
 	<SourcesRoot>src</SourcesRoot>

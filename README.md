@@ -1,4 +1,4 @@
-![](https://github.com/SergeyMi37/apptools-util/blob/master/doc/favicon.ico)
+![](https://github.com/SergeyMi37/apptools-util/blob/master/doc/hammer-green.png)
 ## apptools-util
 [![Gitter](https://img.shields.io/badge/Available%20on-Intersystems%20Open%20Exchange-00b2a9.svg)](https://openexchange.intersystems.com/package/apptools-util-1)
 
