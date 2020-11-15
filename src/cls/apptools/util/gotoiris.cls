@@ -1,6 +1,6 @@
 Include apptools.core
 
-/// research and development ZPM
+/// Adaption to IRIS
 Class apptools.util.gotoiris [ Abstract ]
 {
 

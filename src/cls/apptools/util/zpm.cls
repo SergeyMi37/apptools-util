@@ -12,6 +12,7 @@ Parameter GN = "^%apptools.ZpmLoad";
 /// do ##class(apptools.util.zpm).LoadRegistrys("realworld")
 ClassMethod LoadRegistrys(modulename = "", all = 0, skipZPM = 1) As %Status
 {
+	set currns=$namespace
 	set gn=..#GN
 	set sql="select Name, Version, Repo from %ZPM_PackageManager_Developer.Utils_GetModuleList('registry') "_$s(modulename="":"",1:"where Name=?")
 		,rs=##class(%ResultSet).%New()
@@ -24,12 +25,12 @@ ClassMethod LoadRegistrys(modulename = "", all = 0, skipZPM = 1) As %Status
 			set Version=rs.Get("Version")
 			set Repo=rs.Get("Repo")
 			set ns=$zconvert($tr(name,"-."),"U")
-			if skipZPM, name["isc-apptools"||($e(name,1,3)="zpm") w !,"Skip" continue
+			if skipZPM, name["isc-apptools"||($e(name,1,3)="zpm")||($e(name,1,6)="appmsw") w !,"Skip" continue
 			if $d(@gn@(name)) { ;already load
 				if $lg($g(@gn@(name,"generate")),2)'=""||($lg($g(@gn@(name,"install")),1)'="") {
-					write !,ns_" Removed DB ? Y\N " Read R   quit:"q"[R
+					write !,ns_" Unload Removed DBNS ? Y\N " Read R   quit:"q"[R
 					if $g(R)="y" {
-						do ##class(apptools.util.zpm).DeleteDBNS(name,,,gn)
+						do ##class(apptools.util.zpm).UnloadAndDeleteDBNS(name,,,gn)
 					}
 					continue
 				}
@@ -39,35 +40,42 @@ ClassMethod LoadRegistrys(modulename = "", all = 0, skipZPM = 1) As %Status
 				if 'sta s err=$System.Status.GetErrorText(sta) w !,err w !,"Skip" continue
 				if 'all w !,ns_" Load into a new database ? Y\N " Read R   quit:"q"[R
 				if $g(R)="y"||(all=1) {
-					do ##class(apptools.util.zpm).CreateAndLoad(name,,,gn)
+					do ##class(apptools.util.zpm).CreateDBNSAndLoad(name,,,gn)
 				}
 			}
 		}
 	}
 }
 
-/// d ##class(apptools.util.zpm).DeleteDBNS("sync-dstime")
-ClassMethod DeleteDBNS(name, Version = "", Repo = "", gn = {..#GN}) As %Status
+/// d ##class(apptools.util.zpm).UnloadAndDeleteDBNS("sync-dstime")
+ClassMethod UnloadAndDeleteDBNS(name, Version = "", Repo = "", gn = {..#GN}) As %Status
 {
+	set currns=$namespace
+	new $namespace
 	s ns=$zconvert($tr(name,"-."),"U")
-	s st=##class(apptools.core.GenerateDB).DeleteDBNS(ns, 1)
-	i 'st w $system.Status.GetErrorText(st)
+	set $Namespace=ns
+	set sta=##class(%ZPM.PackageManager).Shell("uninstall "_name)
+	if 'sta w !,$system.Status.GetErrorText(sta)
 	else  k @gn@(name)
+	set $namespace=currns
+	s st=##class(apptools.util.database).DeleteDBNS(ns)
+	i 'st w $system.Status.GetErrorText(st)
 }
 
-/// d ##class(apptools.util.zpm).CreateAndLoad("sync-dstime")
-ClassMethod CreateAndLoad(name, Version = "", Repo = "", gn = {..#GN}) As %Status
+/// d ##class(apptools.util.zpm).CreateDBNSAndLoad("isc-tar")
+ClassMethod CreateDBNSAndLoad(name, Version = "", Repo = "", gn = {..#GN}) As %Status
 {
+	new $namespace
 	k err w !
 	s ns=$zconvert($tr(name,"-."),"U")
-	s st=##class(apptools.core.GenerateDB).Install(ns,0, ns, 1)
+	s st=##class(apptools.util.database).CreateDBNS(ns)
 	i 'st s err=$System.Status.GetErrorText(st) w !,err
 	s @gn@(name,"generate")=$lb(ns,$g(err),st)
 	if st {
 		zn ns
 		;s sta=$zpm("install "_name_" -v")
 		k err
-		w !,"zmp ""install "_name_""""
+		w !,"zpm ""install "_name_""""
 		s sta=##class(%ZPM.PackageManager).Shell("install "_name)
 		i 'sta s err=$System.Status.GetErrorText(sta) w !,err
 		s @gn@(name,"install")=$lb($g(err),sta,Version,Repo)
