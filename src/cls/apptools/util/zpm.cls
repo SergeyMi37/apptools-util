@@ -7,6 +7,106 @@ Class apptools.util.zpm [ Abstract ]
 /// Storage of work history
 Parameter GN = "^%apptools.ZpmLoad";
 
+/// extention zpm commans
+/// do ##class(apptools.util.zpm).extcmd("load https://github.com/Vassil2010/iris-sms")
+/// zapp "newdb spool-demo"
+ClassMethod extcmd(cmd = "") As %Status
+{
+	if $p(cmd," ")="help" q ##class(apptools.util.zpm).help($p(cmd," ",2,*))
+	if $p(cmd," ")="newdb" q ##class(apptools.util.zpm).CreateDBNSAndLoad($p(cmd," ",2,*))
+	if $p(cmd," ")="load" q ##class(apptools.util.zpm).LoadFromRepo($p(cmd," ",2,*))
+}
+
+ClassMethod help(cmd = "") As %Status
+{
+	OPEN 2:$j USE 2
+	if '$lf(..cmdzpmext(),cmd) {
+		do ##class(%ZPM.PackageManager).Shell("help "_cmd)
+		do ##class(apptools.util.zpm).exthelp(cmd)
+	}
+	else { 
+		do ##class(apptools.util.zpm).exthelp(cmd)
+		}
+ 	CLOSE 2
+ 	set i=""
+ 		,help=""
+ 		,cmds=..cmdzpm()_..cmdzpmext()
+ 	for { set i=$o(^SPOOL($j,i),1,s) q:i=""
+ 		set s=" "_s
+ 		if $o(^SPOOL($j,i)) {
+	 		for cm=1:1:$ll(cmds) if s[(" "_$lg(cmds,cm)_" ") set s=$replace(s," "_$lg(cmds,cm)_" "," "_$$$escViolet($lg(cmds,cm))_" ")
+ 			set help=help_s
+ 		}
+ 	}
+ 	KILL ^SPOOL($j)
+	write !,help
+	quit $$$OK
+}
+
+ClassMethod exthelp(cmd = "") As %Status
+{
+ if cmd="" {
+	write !!,"Available commands extention:"
+	write !,"-----------------------------"
+ }
+ if cmd=""||(cmd="newdb") {
+	write !,"newdb <module>"
+ 	write !," Create a new database and an Namespace with a name derived from the name of the module and Install the module into it,"
+ }
+ if cmd=""||(cmd="load") {
+	write !!,"load http://git-repo/developer-name/repo-name"
+ 	write !," Load the module directly from the repository into the current Namespace. The 'git clone' command is applied. The git program must be installed."
+ }
+ write !
+	quit $$$OK
+}
+
+ClassMethod cmdzpm() As %String
+{
+	quit $lb("ver","quit","help","namespace","orphans","list-dependents","list-installed","reload","compile","test","package","verify","publish","load","zn","help","install","uninstall","manage","list","find","search","version","repo","config","generate")
+}
+
+ClassMethod cmdzpmext() As %String
+{
+	quit $lb("newdb")
+}
+
+/// do ##class(apptools.util.zpm).SetColorScheme("dark")
+ClassMethod SetColorScheme(scheme = {$s($zversion(1)=3:"dark",1:"white")}) As %Status
+{
+	write !,1,scheme,1
+	Quit ##class(%ZPM.PackageManager).Shell("config set ColorScheme "_scheme)
+}
+
+/// w ##class(apptools.util.zpm).LoadFromRepo("https://github.com/Vassil2010/iris-sms")
+ClassMethod LoadFromRepo(path = "") As %Status
+{
+	set sls=$$$slash
+	if $e(path,1,4)="http" {
+		set dirrepo=$p(path,"/",*)
+		set dirrnd=$tr($zts,".,")
+		Set TempDir = ##class(%File).GetDirectory(##class(%File).GetDirectory($zu(86))_"mgr"_sls_"Temp"_sls_dirrnd_sls)
+		set st=##class(%File).CreateDirectoryChain(TempDir)
+		if 'st q st
+		write !,"Create tempory directory "_TempDir
+		set filemodule=TempDir_dirrepo_sls_"module.xml"
+		set cmd="cd "_TempDir_" && git clone "_path
+		;w !,cmd,!
+		if $zf(-1,cmd)
+		h 2
+		if $zu(140,1,filemodule)>0 {
+			Quit ##class(%ZPM.PackageManager).Shell("load "_TempDir_sls_dirrepo)
+		}
+		else {
+			Quit $$$ERROR($$$GeneralError,"No ZPM module file "_filemodule)
+		}
+	}
+	else {
+		Quit ##class(%ZPM.PackageManager).Shell("load "_path)
+	}
+	q $$$OK
+}
+
 /// zpm-utility 
 /// repo -r -n registry -url http://127.0.0.1:52773/registry/ -user "superuser" -pass "pass"
 /// do ##class(apptools.util.zpm).LoadRegistrys("realworld")
@@ -40,7 +140,7 @@ ClassMethod LoadRegistrys(modulename = "", all = 0, skipZPM = 1) As %Status
 				if 'sta s err=$System.Status.GetErrorText(sta) w !,err w !,"Skip" continue
 				if 'all w !,ns_" Load into a new database ? Y\N " Read R   quit:"q"[R
 				if $g(R)="y"||(all=1) {
-					do ##class(apptools.util.zpm).CreateDBNSAndLoad(name,,,gn)
+					do ##class(apptools.util.zpm).CreateDBNSAndLoad(name,,,,gn)
 				}
 			}
 		}
@@ -63,14 +163,14 @@ ClassMethod UnloadAndDeleteDBNS(name, Version = "", Repo = "", gn = {..#GN}) As 
 }
 
 /// d ##class(apptools.util.zpm).CreateDBNSAndLoad("isc-tar")
-ClassMethod CreateDBNSAndLoad(name, Version = "", Repo = "", gn = {..#GN}) As %Status
+ClassMethod CreateDBNSAndLoad(name, ns = "", Version = "", Repo = "", gn = "") As %Status
 {
 	new $namespace
 	k err w !
-	s ns=$zconvert($tr(name,"-."),"U")
+	if ns="" s ns=$zconvert($tr(name,"-."),"U")
 	s st=##class(apptools.util.database).CreateDBNS(ns)
 	i 'st s err=$System.Status.GetErrorText(st) w !,err
-	s @gn@(name,"generate")=$lb(ns,$g(err),st)
+	s:gn'="" @gn@(name,"generate")=$lb(ns,$g(err),st)
 	if st {
 		zn ns
 		;s sta=$zpm("install "_name_" -v")
@@ -78,8 +178,9 @@ ClassMethod CreateDBNSAndLoad(name, Version = "", Repo = "", gn = {..#GN}) As %S
 		w !,"zpm ""install "_name_""""
 		s sta=##class(%ZPM.PackageManager).Shell("install "_name)
 		i 'sta s err=$System.Status.GetErrorText(sta) w !,err
-		s @gn@(name,"install")=$lb($g(err),sta,Version,Repo)
+		s:gn'="" @gn@(name,"install")=$lb($g(err),sta,Version,Repo)
 	}
+	q $$$OK
 }
 
 /// Set sc = $$$ADDSC(sc,..CreateProduction()) quit:$$$ISERR(sc)
@@ -301,6 +402,30 @@ ClassMethod add2xdata(dir = "d:\_proj\_zpm\appt-core\src\cls\", classname)
 	zw tList
     ;Do ##class(%ZPM.Installer).CompactPackage(.tList,"App.MSW.type")
     Do ..CompactPackage(.tList,classname)
+}
+
+/// Output color escape sequence
+/// do ##class(apptools.util.zpm).EscColor()
+ClassMethod EscColor(mode = "") As %String
+{
+	if mode="" { //write all colors
+		write ..EscColor(0)
+		//brightness
+		for b=1,2 {
+			for f=30:1:37 {  //font
+				for i=40:1:47 {  //background
+					s code=b_";"_f_";"_i
+					s txt=" write $$$escSeq("""_code_""",""any text"")"
+					w !,$$$escSeq(code,txt)
+				}
+			}
+		}
+	
+	} elseif mode=0 { //cleaning
+		q $c(27)_"[0m"
+	} else {
+		q $c(27)_"["_mode_"m"
+	}
 }
 
 }
