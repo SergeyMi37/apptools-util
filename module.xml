@@ -3,13 +3,13 @@
   <Document name="apptools-util.ZPM">
     <Module>
     <Name>apptools-util</Name>
-    <Version>1.0.2</Version>
+    <Version>1.1.0</Version>
 	<Description>Utilities for generating a XLS file, adapting for IRIS and working with modules ZPM</Description>
     <Packaging>module</Packaging>
 	<Dependencies>
       <ModuleReference>
         <Name>apptools-admin</Name>
-        <Version>1.*.*</Version>
+        <Version>1.1.*</Version>
       </ModuleReference>
     </Dependencies>
 	<SourcesRoot>src</SourcesRoot>
