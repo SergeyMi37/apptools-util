@@ -13,6 +13,9 @@
       </ModuleReference>
     </Dependencies>
 	<SourcesRoot>src</SourcesRoot>
+	<Invokes>
+     <Invoke Class="apptools.util.zapp" Method="UpdateLanguageExtensions"></Invoke>
+    </Invokes>
 	<Resource Name="apptools.util.PKG"/>
     </Module>
   </Document>

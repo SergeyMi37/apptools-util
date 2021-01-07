@@ -2,6 +2,7 @@ Include apptools.core
 
 /// apptools favourite commands in %ZLANGC00.mac
 /// ZAPP(pArgs...) Do ##class(apptools.util.zapp).prompt(pArgs...) 
+/// try { do ##class(apptools.util.zapp).UpdateLanguageExtensions() } catch ex {}
 Class apptools.util.zapp [ Abstract ]
 {
 
@@ -89,8 +90,10 @@ iszpmcmd(cmd) ;If is a zpm command
 /// do ##class(apptools.util.zapp).Favourite("dark")
 ClassMethod help(mask = "") As %Status
 {
+	#define escRed(%t) $Select($$$escBg=0:%t,1:$c(27)_"[1;31;"_$$$escBg_"m"_%t_$$$escClear)
 	kill %zapp,@..#GN@("indx")
-	write !
+	write !,$$$escViolet("Extending ZPM commands, the standard ZPM commands also work as from zpm shell.")
+		,!,"Enter the command "_$$$escRed("number")_" or "_$$$escViolet("name")_" to execute."
 	do ..favourite(.list)
 	merge list=@..#GN@("cmd")
 	set i=""
@@ -119,15 +122,15 @@ write(part,num,cmd)
 	elseif part'=$g(partit) { set partit=part
 		w !!,$$$escGreen(part)	
 	}
-	write !,num,". ",$lg(cmd,1)_" // "_$lg(cmd,4)
+	write !,$$$escRed(num)_"."_$$$escViolet($lg(cmd,3))_" "_$lg(cmd,1)_" // "_$lg(cmd,4)
  quit
 }
 
 /// do ##class(apptools.util.zapp).favourite(.list)
 ClassMethod favourite(ByRef list) As %Status
 {
-	;sys		execute code  prompt:yes,no,never  name-cmd   description
-	set list("sys",$i(list))=$lb("do 1^%SS","n","sys","system status")
+	;sys		           execute code     prompt:yes,no,never=""  name-cmd   description
+	set list("sys",$i(list))=$lb("do 1^%SS","n",                    "sys",     "system status")
 	set list("sys",$i(list))=$lb("zn ""%SYS"" do ^JOBEXAM","y","","job examing")
 	set list("sys",$i(list))=$lb("zn ""%SYS"" do display^GLOBUFF(25)","n","globuff","show global buffer")
 	set list("sys",$i(list))=$lb("zn ""%SYS"" do ^LOCKTAB","n","","show lock table")
@@ -146,6 +149,8 @@ ClassMethod favourite(ByRef list) As %Status
 	;apptools
 	set list("app",$i(list))=$lb("do ##class(apptools.core.code).imp(""/backup/iris/distr/app/"_$zu(110)_"/apptools/xml/"")","","","import release")
 	set list("app",$i(list))=$lb("d ##class(apptools.Security.LockDown).Apply()","","","LockDown")
+	;zapp
+	set list("zapp",$i(list))=$lb("do ##class(apptools.util.zapp).addcmd(""new $namespace zn """"zpmshow"""" do ^zpmshow"",""zapp"",""n"",""zshow"",""Show a zpm modules with extention description"")","n","addzshow","")
 	
 	;production
 	set list("prod",$i(list))=$lb("do ##class(apptools.core.Production).SaveAndStop()","y","","saving status and stoping productions")
@@ -153,12 +158,21 @@ ClassMethod favourite(ByRef list) As %Status
 	q $$$OK
 }
 
-/// do ##class(apptools.util.zapp).addcmd("zn ""zpmshow"" do ^zpmshow","zpm","n","zshow","Show a zpm modules with extention description")
+/// do ##class(apptools.util.zapp).addcmd("new $namespace zn ""zpmshow"" do ^zpmshow","zpm","n","zshow","Show a zpm modules with extention description")
 ClassMethod addcmd(cmd = "", partion = "", prompt = "", namecmd = "", description = "") As %Status
 {
 	if partion="" set partion="other"
 	set @..#GN@("cmd",partion,$i(@..#GN@("cmd")))=$lb(cmd,prompt,namecmd,description)
 	write !,"added "_$zr,!,cmd
+}
+
+/// do ##class(apptools.util.zapp).init()
+ClassMethod init() As %Status
+{
+	new $namespace
+	set $namespace="%sys"
+	do ##class(apptools.util.zapp).UpdateLanguageExtensions()
+	do ##class(%ZPM.PackageManager).UpdateLanguageExtensions()
 }
 
 /// do ##class(apptools.util.zapp).UpdateLanguageExtensions()
