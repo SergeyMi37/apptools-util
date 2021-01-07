@@ -3,7 +3,7 @@
   <Document name="apptools-util.ZPM">
     <Module>
     <Name>apptools-util</Name>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
 	<Description>Utilities for generating a XLS file, adapting for IRIS and working with modules ZPM</Description>
     <Packaging>module</Packaging>
 	<Dependencies>
