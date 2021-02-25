@@ -3,8 +3,8 @@
   <Document name="apptools-util.ZPM">
     <Module>
     <Name>apptools-util</Name>
-    <Version>1.1.2</Version>
-	<Description>ZAPP extending the ZPM commands, the standard ZPM commands also work as from the zpm shell.</Description>
+    <Version>1.1.3</Version>
+	<Description>Utilities for generating a XLS file, adapting for IRIS and working with modules ZPM.</Description>
     <Packaging>module</Packaging>
 	<Dependencies>
       <ModuleReference>
@@ -13,9 +13,6 @@
       </ModuleReference>
     </Dependencies>
 	<SourcesRoot>src</SourcesRoot>
-	<Invokes>
-     <Invoke Class="apptools.util.zapp" Method="init"></Invoke>
-    </Invokes>
 	<Resource Name="apptools.util.PKG"/>
     </Module>
   </Document>
