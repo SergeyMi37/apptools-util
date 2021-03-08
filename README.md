@@ -2,7 +2,14 @@
 ## apptools-util
 [![Gitter](https://img.shields.io/badge/Available%20on-Intersystems%20Open%20Exchange-00b2a9.svg)](https://openexchange.intersystems.com/package/apptools-util-1)
 
-Utilities for generating a XLS file, adapting for IRIS and working with modules ZPM.
+Template and examples for creating a user interface for administrative utilities.
+
+## What's new
+This project is not only a set of [tools for the administrator](#PanelAdmin), but a platform for the rapid creation of a prototype of any solution.
+For example, Photo Album, Music Player, and Personal Books Library all come together in a user-friendly treasure chest design.
+
+Load http:// your-host:your-port/apptoolsrest/a/adminsample
+Load http:// your-host:your-port/apptoolsrest/a/permiss
 
 ## Installation with ZPM
 
