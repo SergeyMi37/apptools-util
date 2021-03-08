@@ -19,6 +19,9 @@
       </ModuleReference>
     </Dependencies>
 	<SourcesRoot>src</SourcesRoot>
+	  <Invokes>
+        <Invoke Class="apptools.lte.adminsample" Method="Init"></Invoke>
+      </Invokes>
 	<Resource Name="apptools.lte.adminsample.CLS"/>
 	<Resource Name="apptools.lte.permiss.CLS"/>
     </Module>
