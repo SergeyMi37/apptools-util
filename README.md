@@ -9,6 +9,7 @@ This project is not only a set of [tools for the administrator](#PanelAdmin), bu
 For example, Photo Album, Music Player, and Personal Books Library all come together in a user-friendly treasure chest design.
 
 Load http:// your-host:your-port/apptoolsrest/a/adminsample
+
 Load http:// your-host:your-port/apptoolsrest/a/permiss
 
 ## Installation with ZPM
