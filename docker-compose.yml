@@ -6,9 +6,12 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports: 
-      - 51663:51773
+# new Super Server Port    
+#      - 51663:51773
+      - 51663:1972
       - 52663:52773
       - 53773
     volumes:
-      - ~/iris.key:/usr/irissys/mgr/iris.key
+# no license reuquired for community kit    
+#      - ~/iris.key:/usr/irissys/mgr/iris.key
       - ./:/irisdev/app
